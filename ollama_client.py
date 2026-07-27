@@ -84,6 +84,11 @@ class OllamaJudge:
             model=self.model,
             messages=[{"role": "user", "content": "ping"}],
             keep_alive=self.keep_alive,
+            options={
+                "num_ctx": 4096,      # ← これ。天井を作る
+                "num_predict": 256,   # 出力JSONは短いので上限を切る
+                "temperature": 0,     # 判定タスクなので決定的に
+            },
         )
 
     def eject(self) -> None:
@@ -93,6 +98,11 @@ class OllamaJudge:
                 model=self.model,
                 messages=[{"role": "user", "content": ""}],
                 keep_alive=0,
+                options={
+                    "num_ctx": 4096,      # ← これ。天井を作る
+                    "num_predict": 256,   # 出力JSONは短いので上限を切る
+                    "temperature": 0,     # 判定タスクなので決定的に
+                },
             )
         except Exception:
             # APIでの明示unloadに失敗した場合はCLIでフォールバック
@@ -111,6 +121,11 @@ class OllamaJudge:
             messages=[{"role": "user", "content": prompt}],
             format="json",
             keep_alive=self.keep_alive,
+            options={
+                "num_ctx": 4096,      # ← これ。天井を作る
+                "num_predict": 256,   # 出力JSONは短いので上限を切る
+                "temperature": 0,     # 判定タスクなので決定的に
+            },
         )
         content = resp["message"]["content"]
         try:

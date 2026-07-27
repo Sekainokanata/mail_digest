@@ -1,0 +1,8 @@
+client_secret_gmail.json
+token_gmail.json
+token_outlook.json
+config.yaml
+venv/
+__pycache__/
+*.pyc
+.mail_digest

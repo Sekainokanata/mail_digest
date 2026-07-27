@@ -1,0 +1,29 @@
+# このファイルを config.yaml にコピーして値を埋めてください。
+
+# 起動直後に取得する過去メールの日数
+fetch_days: 3
+
+ollama:
+  model: "gemma4:12b-it-qat"
+  # ロード後に何もリクエストが来ない場合、この時間だけメモリに保持する
+  # (アプリ終了時はこの設定に関わらず明示的にEjectされる)
+  keep_alive: "10m"
+  # 判定N件ごとにモデルをEject→再ロードし、Ollama側のメモリリークを解放する
+  restart_every: 10
+
+gmail:
+  enabled: true
+  # Google Cloud Consoleでダウンロードした OAuthクライアントの JSON ファイルパス
+  client_secret_path: "client_secret_gmail.json"
+  # 初回認証後に自動生成されるトークン保存先(手動作成不要)
+  token_path: "token_gmail.json"
+
+outlook:
+  enabled: true
+  # Azure Portalで作成したアプリ登録の「アプリケーション(クライアント) ID」
+  client_id: "YOURID"
+  # 個人のMicrosoftアカウント(outlook.com等)を使う場合は "consumers"
+  # 組織アカウント(Microsoft 365)のみの場合は該当のテナントIDまたは "organizations"
+  # どちらも許容する場合は "common"
+  tenant_id: "consumers"
+  token_cache_path: "token_outlook.json"

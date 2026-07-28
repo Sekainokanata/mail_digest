@@ -1,12 +1,12 @@
 """重要メールダイジェスト アプリケーション。
 
 起動時:
-  1. LM Studioを自動起動し、google/gemma-4-12b-qatを自動ロード
+  1. Ollamaのgemma4:12b-it-qatを自動ロード
   2. 直近3日分のGmail/Outlookメールを自動取得
   3. 各メールの重要度をモデルで判定し、重要なものだけ要約して表示
 
 終了時:
-  4. LM Studioのgoogle/gemma-4-12b-qatを自動でアンロード
+  4. Ollamaのgemma4:12b-it-qatを自動でEject(メモリからunload)
 """
 import atexit
 import signal
@@ -15,7 +15,7 @@ import sys
 import yaml
 
 from gmail_client import GmailClient
-from lmstudio_client import LMStudioJudge
+from ollama_client import OllamaJudge
 from outlook_client import OutlookClient
 
 
@@ -27,19 +27,19 @@ def load_config(path: str = "config.yaml") -> dict:
 def main() -> None:
     config = load_config()
     days = config.get("fetch_days", 3)
-    lmstudio_cfg = config.get("lmstudio", {})
-    model = lmstudio_cfg.get("model", "google/gemma-4-12b-qat")
-    keep_alive = lmstudio_cfg.get("keep_alive", "10m")
-    restart_every = lmstudio_cfg.get("restart_every", 10)
+    ollama_cfg = config.get("ollama", {})
+    model = ollama_cfg.get("model", "gemma4:12b-it-qat")
+    keep_alive = ollama_cfg.get("keep_alive", "10m")
+    restart_every = ollama_cfg.get("restart_every", 10)
 
-    judge = LMStudioJudge(model=model, keep_alive=keep_alive)
+    judge = OllamaJudge(model=model, keep_alive=keep_alive)
     ejected = {"done": False}
 
     def cleanup():
         if ejected["done"]:
             return
         ejected["done"] = True
-        print(f"\n[終了処理] {model} をアンロードしています...")
+        print(f"\n[終了処理] {model} をEjectしています...")
         judge.eject()
         print("[終了処理] 完了")
 

@@ -1,14 +1,14 @@
 # Mail Digest — Gmail/Outlook 重要メール自動要約アプリ
 
 Gmail・Outlook(1アカウントずつ)の受信箱から直近3日分のメールを取得し、
-ローカルで動くGemma 4 12B(LM Studio)に重要度を判定させ、重要なメールだけ要約して表示します。
+ローカルで動くGemma 4 12B(Ollama)に重要度を判定させ、重要なメールだけ要約して表示します。
 
 ## 動作の流れ
 
-1. アプリ起動 → LM Studioを自動起動し、`gemma4-12b-it-qat` を自動ロード
+1. アプリ起動 → Ollamaの `gemma4:12b` を自動ロード
 2. 起動直後 → Gmail/Outlookから直近3日分のメールを自動取得
 3. 各メールをモデルに判定させ、重要なものだけ要約付きで一覧表示
-4. アプリ終了(Ctrl+Cや正常終了) → `gemma4-12b-it-qat` を自動でアンロード(メモリ解放)
+4. アプリ終了(Ctrl+Cや正常終了) → `gemma4:12b` を自動でEject(メモリ解放)
 
 ---
 
@@ -17,21 +17,14 @@ Gmail・Outlook(1アカウントずつ)の受信箱から直近3日分のメー�
 このアプリを動かす前に、**Google Cloud** と **Azure** それぞれでアプリ登録が必要です。
 どちらを先にやっても構いません。
 
-### 0-1. LM Studio とモデルの準備
+### 0-1. Ollama とモデルの準備
 
 ```bash
-# LM Studio未インストールの場合
-# https://lmstudio.ai/download からインストール
+# Ollama未インストールの場合
+# https://ollama.com/download からインストール
 
-# CLI(lms)をPATHに通す(初回のみ。LM Studioアプリの「Developer」タブから案内される)
-lms bootstrap
-
-# モデルをダウンロード
-lms get gemma4-12b-it-qat
+ollama pull gemma4:12b-it-qat
 ```
-
-アプリ起動時に `lms server start` でLM Studioのローカルサーバー(既定: `http://localhost:1234`)を
-自動起動し、`lms load` でモデルを自動ロードします。手動でLM Studioアプリを起動しておく必要はありません。
 
 ### 0-2. Google Cloud Console(Gmail用)
 
@@ -92,7 +85,7 @@ python main.py
 - 初回実行時のみ、Outlookはターミナルに表示される「https://microsoft.com/devicelogin」とコードでの認証が必要です。
 - 2回目以降は `token_gmail.json` / `token_outlook.json` にトークンがキャッシュされ、自動的にサインインします(リフレッシュトークン期限切れ時は再認証が必要な場合があります)。
 
-終了する場合は `Ctrl+C` で問題ありません。終了処理として自動的に `lms unload google/gemma-4-12b-qat` 相当の処理が実行されます。
+終了する場合は `Ctrl+C` で問題ありません。終了処理として自動的に `ollama stop gemma4:12b` 相当の処理が実行されます。
 
 ## ファイル構成
 
@@ -101,7 +94,7 @@ mail_digest/
   main.py              # エントリポイント。起動/取得/判定/表示/終了処理を統括
   gmail_client.py       # Gmail API 認証・メール取得
   outlook_client.py     # Microsoft Graph API 認証・メール取得
-  lmstudio_client.py     # LM Studioサーバー起動/モデルのロード・判定・アンロード
+  ollama_client.py      # gemma4:12bのロード/判定/Eject
   config.example.yaml   # 設定ファイルのテンプレート
   requirements.txt
 ```
@@ -109,7 +102,5 @@ mail_digest/
 ## 注意事項
 
 - `client_secret_gmail.json` / `token_*.json` / `config.yaml` には認証情報が含まれるため、Gitリポジトリにコミットしないでください(`.gitignore`推奨)。
-- メール本文をそのままローカルLLMに渡すため、通信は外部に出ません(LM Studioはローカル推論)。ただし取得自体はGoogle/Microsoftのサーバーと通信します。
-- 重要度判定の基準は `lmstudio_client.py` の `IMPORTANCE_PROMPT` で調整できます。
-- LM StudioのCLI(`lms`)がPATHに通っていない場合、初回のみLM Studioアプリの「Developer」タブから
-  案内される `lms bootstrap` コマンドを実行してください。
+- メール本文をそのままローカルLLMに渡すため、通信は外部に出ません(Ollamaはローカル推論)。ただし取得自体はGoogle/Microsoftのサーバーと通信します。
+- 重要度判定の基準は `ollama_client.py` の `IMPORTANCE_PROMPT` で調整できます。
